@@ -1,1 +1,22 @@
-/var/www/html/index.html
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Soft Engine using HTML5 Canvas</title>
+    <style>
+        /*canvas {
+            width: 100%;
+            height: 100%;
+        }*/
+    </style>
+    <script src="binaryfilereader.js"></script>
+    <script src="quakemdl.js"></script>
+
+    <script src="babylon.math.js"></script>
+    <script src="SoftEngine.js"></script>
+    <script src="main.js"></script>
+</head>
+<body>
+    <canvas id="frontBuffer" width="800" height="600" style="background-color: black;"></canvas>
+    <span id="debug"></span>
+</body>
+</html>
