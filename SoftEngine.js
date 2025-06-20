@@ -37,21 +37,38 @@ var SoftEngine;
             this.Faces = new Array(facesCount);
             this.FrameNames = new Array(this.framesCount);
             this.FrameAnims = [];
+            this.proxAnim = -1;
             this.Rotation = new BABYLON.Vector3(0, 0, 0);
             this.Position = new BABYLON.Vector3(0, 0, 0);
             this.meiaSkinW = ((skinWidth || 512) / 2);
         }
+        Mesh.prototype.walk = function (passos) {
+            this.Position.x += Math.cos(this.Rotation.y) * passos;
+            this.Position.z -= Math.sin(this.Rotation.y) * passos;
+        }
         Mesh.prototype.getNameAnim = function () {
             return this.FrameAnims[this.anim].nome;
         }
-        Mesh.prototype.setAnim = function (numAnim) {
-            this.anim = numAnim % this.FrameAnims.length;
+        Mesh.prototype.setAnim = function (numAnim, proxAnim) {
+            var novaAnim = numAnim % this.FrameAnims.length;
+            if (this.anim == novaAnim) return;
+
+            this.anim = novaAnim;
             this.frame = this.FrameAnims[this.anim].frameInicial;
             this.computeFacesNormals();
+
+            this.proxAnim = (proxAnim != undefined) ? proxAnim : -1;
+        }
+        Mesh.prototype.incAnim = function () {
+            this.setAnim(this.anim + 1);
         }
         Mesh.prototype.incFrame = function () {
             this.frame++;
             if (this.frame > this.FrameAnims[this.anim].frameFinal) {
+                if (this.proxAnim > -1) {
+                    this.anim = this.proxAnim;
+                    this.proxAnim = -1;
+                }
                 this.frame = this.FrameAnims[this.anim].frameInicial;
             }
             this.computeFacesNormals();

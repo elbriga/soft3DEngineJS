@@ -8,31 +8,62 @@ window.requestAnimationFrame = (function () {
          };
      })();
 
-var canvas;
 var device;
 var camera;
 var meshes = [];
 
+function onKeyUp(event) {
+    switch(event.code) {
+        case "ArrowUp":
+        case "ArrowDown":
+            meshes[1].setAnim(0);
+            break;
+    }
+}
+
+function onKeyDown(event) {
+    switch(event.code) {
+        case "ArrowUp":
+            meshes[1].setAnim(1);
+            meshes[1].walk(3);
+            break;
+        case "ArrowDown":
+            meshes[1].setAnim(1);
+            meshes[1].walk(-2);
+            break;
+        case "ArrowLeft":
+            meshes[1].Rotation.y -= 0.1;
+            break;
+        case "ArrowRight":
+            meshes[1].Rotation.y += 0.1;
+            break;
+        case "ControlLeft":
+            meshes[1].setAnim(10, 0);
+            break;
+    }
+}
+
 document.addEventListener("DOMContentLoaded", init, false);
 
 function init() {
-    canvas = document.getElementById("frontBuffer");
+    document.getElementById("body").addEventListener('keydown', onKeyDown);
+    document.getElementById("body").addEventListener('keyup',   onKeyUp);
+    
     camera = new SoftEngine.Camera();
-    device = new SoftEngine.Device(canvas);
+    device = new SoftEngine.Device(document.getElementById("frontBuffer"));
 
-    camera.Position = new BABYLON.Vector3(0, 100, 400);
+    camera.Position = new BABYLON.Vector3(0, 80, 400);
     camera.Target   = new BABYLON.Vector3(0, 0, 0);
 
     var mdl = new QuakeMDL("data/models/ogre.mdl");
     mdl.mesh.Rotation.x = 3.14 + (3.14 / 2);
+    mdl.mesh.Rotation.y = 3.14;
     mdl.mesh.Position.x = 50;
-    mdl.mesh.setAnim(3);
     meshes.push(mdl.mesh);
     
     var mdl2 = new QuakeMDL("data/models/hknight.mdl");
     mdl2.mesh.Rotation.x = 3.14 + (3.14 / 2);
     mdl2.mesh.Position.x = -50;
-    mdl2.mesh.setAnim(1);
     meshes.push(mdl2.mesh);
     
     //device.LoadJSONFileAsync("data/models/car.babylon", loadJSONCompleted);
@@ -55,14 +86,14 @@ var lightPos = 0;//new BABYLON.Vector3(0, 20, 0);
 function drawingLoop() {
     device.clear();
 
-    for (var i = 0; i < meshes.length; i++) {
-        // meshes[i].Rotation.x += 0.01;
-        meshes[i].Rotation.y += 0.01;
-        // meshes[i].Rotation.z += 0.01;
-    }
+    var dist = meshes[1].Position.subtract(meshes[0].Position).length();
 
     // document.getElementById("debug").textContent = "lZ: " + lightPos.z;
-    document.getElementById("debug").textContent = "f: " + meshes[1].getNameAnim();
+    document.getElementById("debug").textContent = "anim: " + meshes[1].getNameAnim();
+    // document.getElementById("debug").textContent = "d: " + dist;
+
+    if (dist < 80) meshes[0].setAnim(3)
+    else           meshes[0].setAnim(0)
 
     device.render(camera, meshes, lightPos);
     device.present();
