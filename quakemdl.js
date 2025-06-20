@@ -139,14 +139,15 @@ QuakeMDL.prototype.parseSimpleFrame = function(f, header, texCoords, triangles) 
 }
 
 QuakeMDL.prototype.createMesh = function(f, header, texCoords, triangles, skins) {
-	var mesh = new SoftEngine.Mesh("ogre", header.num_vertices, header.num_triangles, header.num_frames);
+	var mesh = new SoftEngine.Mesh("ogre", header.num_vertices, header.num_triangles, header.num_frames, header.skin_width);
 
 	for (var index = 0; index < header.num_triangles; index++) {
 		var tri = triangles[index];
 		mesh.Faces[index] = {
 			A: tri.vertexIndex[0],
 			B: tri.vertexIndex[1],
-			C: tri.vertexIndex[2]
+			C: tri.vertexIndex[2],
+			isFront: tri.facefront
 		};
 	}
 
@@ -184,11 +185,12 @@ QuakeMDL.prototype.createMesh = function(f, header, texCoords, triangles, skins)
 
 			var s = texCoords[index].s;
 			var t = texCoords[index].t;
+			var onSeam = texCoords[index].onseam ? 1 : 0;
 
 			mesh.Vertices[index + vxtOffset] = {
 					Coordinates:        new BABYLON.Vector3(x, y, z),
 					Normal:             new BABYLON.Vector3(nx, ny, nz),
-					TextureCoordinates: new BABYLON.Vector2(s, t)
+					TextureCoordinates: new BABYLON.Vector3(s, t, onSeam)
 				};
 		}
 

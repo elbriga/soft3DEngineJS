@@ -1,5 +1,24 @@
 var SoftEngine;
 (function (SoftEngine) {
+    var Vertex = (function () {
+        function Vertex() {
+            this.Coordinates = BABYLON.Vector3.Zero();
+            this.Normal = BABYLON.Vector3.Zero();
+            this.TextureCoordinates = BABYLON.Vector3.Zero();
+        }
+        Vertex.copy = function (otherVertex) {
+            var ret = new Vertex();
+
+            ret.Coordinates = otherVertex.Coordinates;
+            ret.Normal = otherVertex.Normal;
+            ret.TextureCoordinates = otherVertex.TextureCoordinates;
+
+            return ret;
+        };
+        return Vertex;
+    })();
+    SoftEngine.Vertex = Vertex;
+
     var Camera = (function () {
         function Camera() {
             this.Position = BABYLON.Vector3.Zero();
@@ -10,7 +29,7 @@ var SoftEngine;
     SoftEngine.Camera = Camera;
 
     var Mesh = (function () {
-        function Mesh(name, verticesCount, facesCount, framesCount) {
+        function Mesh(name, verticesCount, facesCount, framesCount, skinWidth) {
             this.name = name;
             this.frame = 0;
             this.verticesCount = verticesCount;
@@ -19,6 +38,7 @@ var SoftEngine;
             this.Faces = new Array(facesCount);
             this.Rotation = new BABYLON.Vector3(0, 0, 0);
             this.Position = new BABYLON.Vector3(0, 0, 0);
+            this.meiaSkinW = (skinWidth / 2);
         }
         Mesh.prototype.setFrame = function (numFrame) {
             this.frame = numFrame;
@@ -370,9 +390,15 @@ var SoftEngine;
                     var transformedNormal = BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView);
 
                     if (1 || transformedNormal.z < 0) {
-                        var vertexA = cMesh.Vertices[currentFace.A + vertexOffset];
-                        var vertexB = cMesh.Vertices[currentFace.B + vertexOffset];
-                        var vertexC = cMesh.Vertices[currentFace.C + vertexOffset];
+                        var vertexA = Vertex.copy(cMesh.Vertices[currentFace.A + vertexOffset]);
+                        var vertexB = Vertex.copy(cMesh.Vertices[currentFace.B + vertexOffset]);
+                        var vertexC = Vertex.copy(cMesh.Vertices[currentFace.C + vertexOffset]);
+
+                        if (!currentFace.isFront) {
+                            if (vertexA.TextureCoordinates.z) vertexA.TextureCoordinates.x += cMesh.meiaSkinW;
+                            if (vertexB.TextureCoordinates.z) vertexB.TextureCoordinates.x += cMesh.meiaSkinW;
+                            if (vertexC.TextureCoordinates.z) vertexC.TextureCoordinates.x += cMesh.meiaSkinW;
+                        }
 
                         var pixelA = this.project(vertexA, transformMatrix, worldMatrix);
                         var pixelB = this.project(vertexB, transformMatrix, worldMatrix);
