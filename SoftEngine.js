@@ -6,12 +6,12 @@ var SoftEngine;
             this.Normal = BABYLON.Vector3.Zero();
             this.TextureCoordinates = BABYLON.Vector3.Zero();
         }
-        Vertex.copy = function (otherVertex) {
+        Vertex.Copy = function (otherVertex) {
             var ret = new Vertex();
 
-            ret.Coordinates = otherVertex.Coordinates;
-            ret.Normal = otherVertex.Normal;
-            ret.TextureCoordinates = otherVertex.TextureCoordinates;
+            ret.Coordinates = BABYLON.Vector3.Copy(otherVertex.Coordinates);
+            ret.Normal = BABYLON.Vector3.Copy(otherVertex.Normal);
+            ret.TextureCoordinates = BABYLON.Vector3.Copy(otherVertex.TextureCoordinates);
 
             return ret;
         };
@@ -390,9 +390,9 @@ var SoftEngine;
                     var transformedNormal = BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView);
 
                     if (1 || transformedNormal.z < 0) {
-                        var vertexA = Vertex.copy(cMesh.Vertices[currentFace.A + vertexOffset]);
-                        var vertexB = Vertex.copy(cMesh.Vertices[currentFace.B + vertexOffset]);
-                        var vertexC = Vertex.copy(cMesh.Vertices[currentFace.C + vertexOffset]);
+                        var vertexA = Vertex.Copy(cMesh.Vertices[currentFace.A + vertexOffset]);
+                        var vertexB = Vertex.Copy(cMesh.Vertices[currentFace.B + vertexOffset]);
+                        var vertexC = Vertex.Copy(cMesh.Vertices[currentFace.C + vertexOffset]);
 
                         if (!currentFace.isFront) {
                             if (vertexA.TextureCoordinates.z) vertexA.TextureCoordinates.x += cMesh.meiaSkinW;
