@@ -72,7 +72,10 @@ var SoftEngine;
         function Texture(filename, width, height) {
             this.width = width;
             this.height = height;
-            //this.load(filename);
+
+            if (filename.substring(filename.length - 4) == '.png') {
+                this.load("data/textures/" + filename);
+            }
         }
         Texture.prototype.set = function (bitmap) {
             this.internalBuffer = {};
@@ -108,8 +111,14 @@ var SoftEngine;
 
         Texture.prototype.map = function (tu, tv) {
             if (this.internalBuffer) {
-                var u = Math.abs(((tu) % this.width)) >> 0;
-                var v = Math.abs(((tv) % this.height)) >> 0;
+                var u, v;
+                if (tu < 1.0) {
+                    var u = Math.abs(((tu * this.width) % this.width)) >> 0;
+                    var v = Math.abs(((tv * this.height) % this.height)) >> 0;
+                } else {
+                    var u = Math.abs(((tu) % this.width)) >> 0;
+                    var v = Math.abs(((tv) % this.height)) >> 0;
+                }
 
                 var pos = (u + v * this.width) * 4;
 
