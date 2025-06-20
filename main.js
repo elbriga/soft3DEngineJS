@@ -20,13 +20,19 @@ function init() {
     camera = new SoftEngine.Camera();
     device = new SoftEngine.Device(canvas);
 
-    camera.Position = new BABYLON.Vector3(0, 0, 200);
+    camera.Position = new BABYLON.Vector3(0, 0, 400);
     camera.Target   = new BABYLON.Vector3(0, 0, 0);
 
     //device.LoadJSONFileAsync("monkey.babylon", loadJSONCompleted);
     var mdl = new QuakeMDL("data/models/ogre.mdl");
     mdl.mesh.Rotation.x = 3.14 + (3.14 / 2);
+    mdl.mesh.Position.x = 50;
     meshes.push(mdl.mesh);
+
+    var mdl2 = new QuakeMDL("data/models/hknight.mdl");
+    mdl2.mesh.Rotation.x = 3.14 + (3.14 / 2);
+    mdl2.mesh.Position.x = -50;
+    meshes.push(mdl2.mesh);
 
     requestAnimationFrame(drawingLoop);
 }
@@ -38,7 +44,7 @@ function loadJSONCompleted(meshesLoaded) {
 }
 
 var delayCount = 2;
-var animationDelay = 0, numFrame = 0;
+var animationDelay = 0, numFrame = 0, numFrame2 = 0;
 function drawingLoop() {
     device.clear();
 
@@ -57,11 +63,11 @@ function drawingLoop() {
     if (animationDelay > delayCount) {
         animationDelay = 0;
 
-        numFrame++;
-        if (numFrame >= meshes[0].framesCount)
-            numFrame = 0;
-
+        numFrame = (numFrame + 1) % meshes[0].framesCount;
         meshes[0].setFrame(numFrame);
+
+        numFrame2 = (numFrame2 + 1) % 9;
+        meshes[1].setFrame(numFrame2);
     }
 
     requestAnimationFrame(drawingLoop);
