@@ -23,22 +23,26 @@ function init() {
     camera.Position = new BABYLON.Vector3(0, 0, 400);
     camera.Target   = new BABYLON.Vector3(0, 0, 0);
 
-    //device.LoadJSONFileAsync("monkey.babylon", loadJSONCompleted);
     var mdl = new QuakeMDL("data/models/ogre.mdl");
     mdl.mesh.Rotation.x = 3.14 + (3.14 / 2);
     mdl.mesh.Position.x = 50;
     meshes.push(mdl.mesh);
-
+    
     var mdl2 = new QuakeMDL("data/models/hknight.mdl");
     mdl2.mesh.Rotation.x = 3.14 + (3.14 / 2);
     mdl2.mesh.Position.x = -50;
     meshes.push(mdl2.mesh);
+    
+    device.LoadJSONFileAsync("data/models/car.babylon", loadJSONCompleted);
 
-    requestAnimationFrame(drawingLoop);
+    //requestAnimationFrame(drawingLoop);
 }
 
 function loadJSONCompleted(meshesLoaded) {
-    meshes = meshesLoaded;
+    for (var m=0; m < meshesLoaded.length; m++) {
+        meshesLoaded[m].scale(20.0);
+        meshes.push(meshesLoaded[m]);
+    }
 
     requestAnimationFrame(drawingLoop);
 }
