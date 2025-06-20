@@ -31,18 +31,23 @@ var SoftEngine;
             this.name = name;
             this.frame = 0;
             this.verticesCount = verticesCount;
-            this.framesCount = framesCount;
-            this.Vertices = new Array(verticesCount * framesCount);
+            this.framesCount = framesCount || 1;
+            this.Vertices = new Array(this.verticesCount * this.framesCount);
             this.Faces = new Array(facesCount);
             this.Rotation = new BABYLON.Vector3(0, 0, 0);
             this.Position = new BABYLON.Vector3(0, 0, 0);
-            this.meiaSkinW = (skinWidth / 2);
+            this.meiaSkinW = ((skinWidth || 512) / 2);
         }
         Mesh.prototype.setFrame = function (numFrame) {
             this.frame = numFrame % this.framesCount;
             this.computeFacesNormals();
             return this.frame;
         };
+        Mesh.prototype.scale = function (scale) {
+            for (var v=0; v < this.verticesCount * this.framesCount; v++) {
+                this.Vertices[v].Coordinates = this.Vertices[v].Coordinates.scale(scale);
+            }
+        }
         Mesh.prototype.computeFacesNormals = function () {
             if (!backfaceCullingON)
                 return;
@@ -271,7 +276,7 @@ var SoftEngine;
 
             var lightON = false;
             if (lightON) {
-                var lightPos = new BABYLON.Vector3(0, 0, 100);
+                var lightPos = new BABYLON.Vector3(0, 20, 200);
 
                 var nl1 = this.computeNDotL(v1.WorldCoordinates, v1.Normal, lightPos);
                 var nl2 = this.computeNDotL(v2.WorldCoordinates, v2.Normal, lightPos);
