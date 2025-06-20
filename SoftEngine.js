@@ -1,3 +1,4 @@
+var backfaceCullingON = false;
 var SoftEngine;
 (function (SoftEngine) {
     var Vertex = (function () {
@@ -38,12 +39,14 @@ var SoftEngine;
             this.meiaSkinW = (skinWidth / 2);
         }
         Mesh.prototype.setFrame = function (numFrame) {
-            this.frame = numFrame;
-            if (this.frame >= this.framesCount)
-                this.frame = 0;
+            this.frame = numFrame % this.framesCount;
             this.computeFacesNormals();
+            return this.frame;
         };
         Mesh.prototype.computeFacesNormals = function () {
+            if (!backfaceCullingON)
+                return;
+
             var vertexOffset = this.frame * this.verticesCount;
             for (var indexFaces = 0; indexFaces < this.Faces.length; indexFaces++) {
                 var currentFace = this.Faces[indexFaces];
@@ -376,7 +379,6 @@ var SoftEngine;
         };
 
         Device.prototype.render = function (camera, meshes) {
-            var backfaceCulling = false;
             var viewMatrix = BABYLON.Matrix.LookAtLH(camera.Position, camera.Target, BABYLON.Vector3.Up());
             var projectionMatrix = BABYLON.Matrix.PerspectiveFovLH(0.78, this.workingWidth / this.workingHeight, 0.01, 1.0);
 
@@ -392,11 +394,11 @@ var SoftEngine;
                 for (var indexFaces = 0; indexFaces < cMesh.Faces.length; indexFaces++) {
                     var currentFace = cMesh.Faces[indexFaces];
 
-                    var transformedNormal = backfaceCulling ?
-                        BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView) :
-                        new BABYLON.Vector3(0,0,-1);
+                    var transformedNormalZ = backfaceCullingON ?
+                        BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView).z :
+                        -1;
 
-                    if (transformedNormal.z < 0) {
+                    if (transformedNormalZ < 0) {
                         var vertexA = Vertex.Copy(cMesh.Vertices[currentFace.A + vertexOffset]);
                         var vertexB = Vertex.Copy(cMesh.Vertices[currentFace.B + vertexOffset]);
                         var vertexC = Vertex.Copy(cMesh.Vertices[currentFace.C + vertexOffset]);
