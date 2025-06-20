@@ -24,7 +24,7 @@ function init() {
     camera.Target   = new BABYLON.Vector3(0, 0, 0);
 
     //device.LoadJSONFileAsync("monkey.babylon", loadJSONCompleted);
-    var mdl = new QuakeMDL("enforcer.mdl");
+    var mdl = new QuakeMDL("data/models/enforcer.mdl");
     mdl.mesh.Rotation.x = 3.14 + (3.14 / 2);
     meshes.push(mdl.mesh);
 
