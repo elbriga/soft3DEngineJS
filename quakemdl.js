@@ -8,8 +8,7 @@ function QuakeMDL(url) {
 
 	// create mesh
 	this.mesh = this.createMesh(f, header, texCoords, triangles, skins);
-	// this.material = new SJSGL.Material;
-	// this.material.texture = new SJSGL.Texture2D(header.skin_width, header.skin_height, skins[0].data);
+	this.mesh.parseFramesNames();
 }
 
 QuakeMDL.prototype.parseHeader = function(f) {
@@ -90,11 +89,16 @@ QuakeMDL.prototype.parseTriangles = function(f, header) {
 	return triangles;
 }
 
-QuakeMDL.prototype.parseSimpleFrame = function(f, header, texCoords, triangles) {
-	f.ignore(2*4 + 16); // bboxmin, bboxmax, name[16]
+QuakeMDL.prototype.parseSimpleFrame = function(f, header) {
+	f.ignore(2*4); // bboxmin, bboxmax
 
-	//var test = f.readArray(16);
-	//document.write(test.substring(0, test.indexOf('\0')) + "<br>");
+	var name = f.readArray(16), ch;
+	for (ch=0; ch<16; ch++) {
+		if (name.charAt(ch) == '\0') {
+			break;
+		}
+	}
+	name = name.substring(0, ch);
 
 	var vertices = [];
 	for (var j=0; j<header.num_vertices; ++j) {
@@ -108,34 +112,7 @@ QuakeMDL.prototype.parseSimpleFrame = function(f, header, texCoords, triangles) 
 		};
 	}
 
-	// var frame = new SJSGL.Mesh.Animation.Frame;
-
-	// for (var j=0; j<header.num_triangles; ++j) {
-	// 	for (var k=0; k<3; ++k) {
-	// 		var pvert = vertices[triangles[j].vertexIndex[k]];
-
-	// 		// vertices
-	// 		frame.vertices.push(pvert.vertex[0] * header.scale[0] + header.translate[0]);
-	// 		frame.vertices.push(pvert.vertex[1] * header.scale[1] + header.translate[1]);
-	// 		frame.vertices.push(pvert.vertex[2] * header.scale[2] + header.translate[2]);
-
-	// 		// normals
-	// 		frame.normals.push(QuakeMDL.anormals[pvert.normalIndex][0]);
-	// 		frame.normals.push(QuakeMDL.anormals[pvert.normalIndex][1]);
-	// 		frame.normals.push(QuakeMDL.anormals[pvert.normalIndex][2]);
-
-	// 		// texture coordinates
-	// 		var s = texCoords[triangles[j].vertexIndex[k]].s;
-	// 		var t = texCoords[triangles[j].vertexIndex[k]].t;
-	// 		if (!triangles[j].facefront && texCoords[triangles[j].vertexIndex[k]].onseam) {
-	// 			s += header.skin_width * 0.5;
-	// 		}
-	// 		frame.texCoords.push((s + 0.5) / header.skin_width);
-	// 		frame.texCoords.push((t + 0.5) / header.skin_height);
-	// 	}
-	// }
-
-	return vertices;
+	return { name: name, vertices: vertices };
 }
 
 QuakeMDL.prototype.createMesh = function(f, header, texCoords, triangles, skins) {
@@ -155,11 +132,11 @@ QuakeMDL.prototype.createMesh = function(f, header, texCoords, triangles, skins)
 	mesh.Texture.set(skins[0].data);
 
 	for (var i=0; i<header.num_frames; ++i) {
-		var vertices;
+		var frame;
 
 		if (f.readInt32() == 0) {
 			// non-group frames
-			vertices = this.parseSimpleFrame(f, header, texCoords, triangles);
+			frame = this.parseSimpleFrame(f, header);
 		} else {
 			// group frames -TODO
 			var frames_in_group = f.readInt32();
@@ -167,10 +144,13 @@ QuakeMDL.prototype.createMesh = function(f, header, texCoords, triangles, skins)
 			var interval = f.readFloat32(); // only the first one matters?
 			f.ignore((frames_in_group - 1) * 4); // ignore rest
 			for (var j=0; j<frames_in_group; j++) {
-				vertices = this.parseSimpleFrame(f, header, texCoords, triangles);
-				
+				frame = this.parseSimpleFrame(f, header);
 			}
 		}
+
+		mesh.FrameNames[i] = frame.name;
+
+		var vertices = frame.vertices;
 
 		var vxtOffset = i * header.num_vertices;
 		for (var index = 0; index < header.num_vertices; index++) {

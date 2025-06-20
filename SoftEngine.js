@@ -29,24 +29,82 @@ var SoftEngine;
     var Mesh = (function () {
         function Mesh(name, verticesCount, facesCount, framesCount, skinWidth) {
             this.name = name;
-            this.frame = 0;
+            this.frame = 0; // Current frame
+            this.anim = 0;  // Current anim
             this.verticesCount = verticesCount;
             this.framesCount = framesCount || 1;
             this.Vertices = new Array(this.verticesCount * this.framesCount);
             this.Faces = new Array(facesCount);
+            this.FrameNames = new Array(this.framesCount);
+            this.FrameAnims = [];
             this.Rotation = new BABYLON.Vector3(0, 0, 0);
             this.Position = new BABYLON.Vector3(0, 0, 0);
             this.meiaSkinW = ((skinWidth || 512) / 2);
         }
-        Mesh.prototype.setFrame = function (numFrame) {
-            this.frame = numFrame % this.framesCount;
+        Mesh.prototype.getNameAnim = function () {
+            return this.FrameAnims[this.anim].nome;
+        }
+        Mesh.prototype.setAnim = function (numAnim) {
+            this.anim = numAnim % this.FrameAnims.length;
+            this.frame = this.FrameAnims[this.anim].frameInicial;
             this.computeFacesNormals();
-            return this.frame;
+        }
+        Mesh.prototype.incFrame = function () {
+            this.frame++;
+            if (this.frame > this.FrameAnims[this.anim].frameFinal) {
+                this.frame = this.FrameAnims[this.anim].frameInicial;
+            }
+            this.computeFacesNormals();
         };
         Mesh.prototype.scale = function (scale) {
             for (var v=0; v < this.verticesCount * this.framesCount; v++) {
                 this.Vertices[v].Coordinates = this.Vertices[v].Coordinates.scale(scale);
             }
+        }
+        Mesh.prototype.parseFramesNames = function () {
+            var basenome = "", novonome, frameInicial, frameFinal, totAnims = 0;
+            for (var nf=0; nf<this.FrameNames.length; nf++) {
+                var nomeFrame = this.FrameNames[nf];
+
+                if (basenome == "") {
+                    // Achar a base do nome do frame, sem o numero
+                    for (var n=0; n<16; n++) {
+                        if (nomeFrame.charAt(n) >= '0' && nomeFrame.charAt(n) <= '9') {
+                            basenome = nomeFrame.substring(0, n);
+                            break;
+                        }
+                    }
+        
+                    frameInicial = nf;
+                    totAnims++;
+                } else {
+                    novonome = nomeFrame;
+                    for (var n=0; n<16; n++) {
+                        if (nomeFrame.charAt(n) >= '0' && nomeFrame.charAt(n) <= '9') {
+                            novonome = nomeFrame.substring(0, n);
+                            break;
+                        }
+                    }
+
+                    if (novonome == basenome) {
+                        // Ainda estamos no mesmo basenome
+                        frameFinal = nf;
+                    } else {
+                        this.FrameAnims.push({
+                            nome: basenome,
+                            frameInicial: frameInicial,
+                            frameFinal: frameFinal
+                        });
+                        basenome = ""; // proximo
+                        nf--;
+                    }
+                }
+            }
+            this.FrameAnims.push({
+                nome: basenome,
+                frameInicial: frameInicial,
+                frameFinal: frameFinal
+            });
         }
         Mesh.prototype.computeFacesNormals = function () {
             if (!backfaceCullingON)

@@ -26,16 +26,18 @@ function init() {
     var mdl = new QuakeMDL("data/models/ogre.mdl");
     mdl.mesh.Rotation.x = 3.14 + (3.14 / 2);
     mdl.mesh.Position.x = 50;
+    mdl.mesh.setAnim(3);
     meshes.push(mdl.mesh);
     
     var mdl2 = new QuakeMDL("data/models/hknight.mdl");
     mdl2.mesh.Rotation.x = 3.14 + (3.14 / 2);
     mdl2.mesh.Position.x = -50;
+    mdl2.mesh.setAnim(1);
     meshes.push(mdl2.mesh);
     
-    device.LoadJSONFileAsync("data/models/car.babylon", loadJSONCompleted);
+    //device.LoadJSONFileAsync("data/models/car.babylon", loadJSONCompleted);
 
-    //requestAnimationFrame(drawingLoop);
+    requestAnimationFrame(drawingLoop);
 }
 
 function loadJSONCompleted(meshesLoaded) {
@@ -48,7 +50,7 @@ function loadJSONCompleted(meshesLoaded) {
 }
 
 var delayCount = 2, deltaLuz = 5;
-var animationDelay = 0, numFrame = 0, numFrame2 = 0;
+var animationDelay = 0;
 var lightPos = 0;//new BABYLON.Vector3(0, 20, 0);
 function drawingLoop() {
     device.clear();
@@ -59,7 +61,8 @@ function drawingLoop() {
         // meshes[i].Rotation.z += 0.01;
     }
 
-    document.getElementById("debug").textContent = "lZ: " + lightPos.z;
+    // document.getElementById("debug").textContent = "lZ: " + lightPos.z;
+    document.getElementById("debug").textContent = "f: " + meshes[1].getNameAnim();
 
     device.render(camera, meshes, lightPos);
     device.present();
@@ -68,11 +71,8 @@ function drawingLoop() {
     if (animationDelay > delayCount) {
         animationDelay = 0;
 
-        numFrame = (numFrame + 1) % meshes[0].framesCount;
-        meshes[0].setFrame(numFrame);
-
-        numFrame2 = (numFrame2 + 1) % 9;
-        meshes[1].setFrame(numFrame2);
+        meshes[0].incFrame();
+        meshes[1].incFrame();
     }
 
     if (lightPos) {
