@@ -266,11 +266,18 @@ var SoftEngine;
             var p2 = v2.Coordinates;
             var p3 = v3.Coordinates;
 
-            var lightPos = new BABYLON.Vector3(0, 0, 100);
+            var lightON = false;
+            if (lightON) {
+                var lightPos = new BABYLON.Vector3(0, 0, 100);
 
-            var nl1 = this.computeNDotL(v1.WorldCoordinates, v1.Normal, lightPos);
-            var nl2 = this.computeNDotL(v2.WorldCoordinates, v2.Normal, lightPos);
-            var nl3 = this.computeNDotL(v3.WorldCoordinates, v3.Normal, lightPos);
+                var nl1 = this.computeNDotL(v1.WorldCoordinates, v1.Normal, lightPos);
+                var nl2 = this.computeNDotL(v2.WorldCoordinates, v2.Normal, lightPos);
+                var nl3 = this.computeNDotL(v3.WorldCoordinates, v3.Normal, lightPos);
+            } else {
+                nl1 = 1.0;
+                nl2 = 1.0;
+                nl3 = 1.0;
+            }
 
             var data = {};
 
@@ -369,6 +376,7 @@ var SoftEngine;
         };
 
         Device.prototype.render = function (camera, meshes) {
+            var backfaceCulling = false;
             var viewMatrix = BABYLON.Matrix.LookAtLH(camera.Position, camera.Target, BABYLON.Vector3.Up());
             var projectionMatrix = BABYLON.Matrix.PerspectiveFovLH(0.78, this.workingWidth / this.workingHeight, 0.01, 1.0);
 
@@ -384,7 +392,9 @@ var SoftEngine;
                 for (var indexFaces = 0; indexFaces < cMesh.Faces.length; indexFaces++) {
                     var currentFace = cMesh.Faces[indexFaces];
 
-                    var transformedNormal = BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView);
+                    var transformedNormal = backfaceCulling ?
+                        BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView) :
+                        new BABYLON.Vector3(0,0,-1);
 
                     if (transformedNormal.z < 0) {
                         var vertexA = Vertex.Copy(cMesh.Vertices[currentFace.A + vertexOffset]);
