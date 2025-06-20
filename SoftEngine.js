@@ -113,11 +113,11 @@ var SoftEngine;
             if (this.internalBuffer) {
                 var u, v;
                 if (tu < 1.0) {
-                    var u = Math.abs(((tu * this.width) % this.width)) >> 0;
-                    var v = Math.abs(((tv * this.height) % this.height)) >> 0;
+                    u = Math.abs(((tu * this.width ) % this.width )) >> 0;
+                    v = Math.abs(((tv * this.height) % this.height)) >> 0;
                 } else {
-                    var u = Math.abs(((tu) % this.width)) >> 0;
-                    var v = Math.abs(((tv) % this.height)) >> 0;
+                    u = Math.abs(((tu) % this.width )) >> 0;
+                    v = Math.abs(((tv) % this.height)) >> 0;
                 }
 
                 var pos = (u + v * this.width) * 4;
@@ -260,7 +260,7 @@ var SoftEngine;
             }
         };
 
-        Device.prototype.drawTriangle = function (v1, v2, v3, color, texture) {
+        Device.prototype.drawTriangle = function (v1, v2, v3, color, texture, lightPos) {
             if (v1.Coordinates.y > v2.Coordinates.y) {
                 var temp = v2;
                 v2 = v1;
@@ -283,18 +283,9 @@ var SoftEngine;
             var p2 = v2.Coordinates;
             var p3 = v3.Coordinates;
 
-            var lightON = false;
-            if (lightON) {
-                var lightPos = new BABYLON.Vector3(0, 20, 200);
-
-                var nl1 = this.computeNDotL(v1.WorldCoordinates, v1.Normal, lightPos);
-                var nl2 = this.computeNDotL(v2.WorldCoordinates, v2.Normal, lightPos);
-                var nl3 = this.computeNDotL(v3.WorldCoordinates, v3.Normal, lightPos);
-            } else {
-                nl1 = 1.0;
-                nl2 = 1.0;
-                nl3 = 1.0;
-            }
+            var nl1 = lightPos ? this.computeNDotL(v1.WorldCoordinates, v1.Normal, lightPos) : 1;
+            var nl2 = lightPos ? this.computeNDotL(v2.WorldCoordinates, v2.Normal, lightPos) : 1;
+            var nl3 = lightPos ? this.computeNDotL(v3.WorldCoordinates, v3.Normal, lightPos) : 1;
 
             var data = {};
 
@@ -392,7 +383,7 @@ var SoftEngine;
             }
         };
 
-        Device.prototype.render = function (camera, meshes) {
+        Device.prototype.render = function (camera, meshes, lightPos) {
             var viewMatrix = BABYLON.Matrix.LookAtLH(camera.Position, camera.Target, BABYLON.Vector3.Up());
             var projectionMatrix = BABYLON.Matrix.PerspectiveFovLH(0.78, this.workingWidth / this.workingHeight, 0.01, 1.0);
 
@@ -428,7 +419,7 @@ var SoftEngine;
                         var pixelC = this.project(vertexC, transformMatrix, worldMatrix);
 
                         var color = 1.0;
-                        this.drawTriangle(pixelA, pixelB, pixelC, new BABYLON.Color4(color, color, color, 1), cMesh.Texture);
+                        this.drawTriangle(pixelA, pixelB, pixelC, new BABYLON.Color4(color, color, color, 1), cMesh.Texture, lightPos);
                     }
                 }
             }

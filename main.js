@@ -20,7 +20,7 @@ function init() {
     camera = new SoftEngine.Camera();
     device = new SoftEngine.Device(canvas);
 
-    camera.Position = new BABYLON.Vector3(0, 0, 400);
+    camera.Position = new BABYLON.Vector3(0, 100, 400);
     camera.Target   = new BABYLON.Vector3(0, 0, 0);
 
     var mdl = new QuakeMDL("data/models/ogre.mdl");
@@ -47,8 +47,9 @@ function loadJSONCompleted(meshesLoaded) {
     requestAnimationFrame(drawingLoop);
 }
 
-var delayCount = 2;
+var delayCount = 2, deltaLuz = 5;
 var animationDelay = 0, numFrame = 0, numFrame2 = 0;
+var lightPos = 0;//new BABYLON.Vector3(0, 20, 0);
 function drawingLoop() {
     device.clear();
 
@@ -58,9 +59,9 @@ function drawingLoop() {
         // meshes[i].Rotation.z += 0.01;
     }
 
-    document.getElementById("debug").textContent = "X: " + meshes[0].Rotation.x;
+    document.getElementById("debug").textContent = "lZ: " + lightPos.z;
 
-    device.render(camera, meshes);
+    device.render(camera, meshes, lightPos);
     device.present();
 
     animationDelay++;
@@ -72,6 +73,13 @@ function drawingLoop() {
 
         numFrame2 = (numFrame2 + 1) % 9;
         meshes[1].setFrame(numFrame2);
+    }
+
+    if (lightPos) {
+        lightPos.z += deltaLuz;
+        if (lightPos.z > 100 || lightPos.z < -100) {
+            deltaLuz = 0 - deltaLuz;
+        }
     }
 
     requestAnimationFrame(drawingLoop);
