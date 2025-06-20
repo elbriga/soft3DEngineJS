@@ -187,11 +187,11 @@ QuakeMDL.prototype.createMesh = function(f, header, texCoords, triangles, skins)
 			var t = texCoords[index].t;
 			var onSeam = texCoords[index].onseam ? 1 : 0;
 
-			mesh.Vertices[index + vxtOffset] = {
-					Coordinates:        new BABYLON.Vector3(x, y, z),
-					Normal:             new BABYLON.Vector3(nx, ny, nz),
-					TextureCoordinates: new BABYLON.Vector3(s, t, onSeam)
-				};
+			mesh.Vertices[index + vxtOffset] = new SoftEngine.Vertex(
+					new BABYLON.Vector3(x, y, z),
+					new BABYLON.Vector3(nx, ny, nz),
+					new BABYLON.Vector3(s, t, onSeam)
+				);
 		}
 
 	}

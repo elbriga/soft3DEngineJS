@@ -1,19 +1,16 @@
 var SoftEngine;
 (function (SoftEngine) {
     var Vertex = (function () {
-        function Vertex() {
-            this.Coordinates = BABYLON.Vector3.Zero();
-            this.Normal = BABYLON.Vector3.Zero();
-            this.TextureCoordinates = BABYLON.Vector3.Zero();
+        function Vertex(coords, normal, texcoords) {
+            this.Coordinates        = coords    || BABYLON.Vector3.Zero();
+            this.Normal             = normal    || BABYLON.Vector3.Zero();
+            this.TextureCoordinates = texcoords || BABYLON.Vector3.Zero();
         }
         Vertex.Copy = function (otherVertex) {
-            var ret = new Vertex();
-
-            ret.Coordinates = BABYLON.Vector3.Copy(otherVertex.Coordinates);
-            ret.Normal = BABYLON.Vector3.Copy(otherVertex.Normal);
-            ret.TextureCoordinates = BABYLON.Vector3.Copy(otherVertex.TextureCoordinates);
-
-            return ret;
+            return new Vertex(
+                BABYLON.Vector3.Copy(otherVertex.Coordinates),
+                BABYLON.Vector3.Copy(otherVertex.Normal),
+                BABYLON.Vector3.Copy(otherVertex.TextureCoordinates));
         };
         return Vertex;
     })();
@@ -47,7 +44,7 @@ var SoftEngine;
             this.computeFacesNormals();
         };
         Mesh.prototype.computeFacesNormals = function () {
-            var vertexOffset = this.frame * this.framesCount;
+            var vertexOffset = this.frame * this.verticesCount;
             for (var indexFaces = 0; indexFaces < this.Faces.length; indexFaces++) {
                 var currentFace = this.Faces[indexFaces];
 
@@ -55,8 +52,8 @@ var SoftEngine;
                 var vertexB = this.Vertices[currentFace.B + vertexOffset];
                 var vertexC = this.Vertices[currentFace.C + vertexOffset];
 
-                this.Faces[indexFaces].Normal = (vertexA.Normal.add(vertexB.Normal.add(vertexC.Normal))).scale(1 / 3);
-                this.Faces[indexFaces].Normal.normalize();
+                currentFace.Normal = (vertexA.Normal.add(vertexB.Normal.add(vertexC.Normal))).scale(1 / 3);
+                // this.Faces[indexFaces].Normal.normalize();
             }
         };
         return Mesh;
@@ -269,7 +266,7 @@ var SoftEngine;
             var p2 = v2.Coordinates;
             var p3 = v3.Coordinates;
 
-            var lightPos = new BABYLON.Vector3(0, 50, 200);
+            var lightPos = new BABYLON.Vector3(0, 0, 100);
 
             var nl1 = this.computeNDotL(v1.WorldCoordinates, v1.Normal, lightPos);
             var nl2 = this.computeNDotL(v2.WorldCoordinates, v2.Normal, lightPos);
@@ -389,7 +386,7 @@ var SoftEngine;
 
                     var transformedNormal = BABYLON.Vector3.TransformNormal(currentFace.Normal, worldView);
 
-                    if (1 || transformedNormal.z < 0) {
+                    if (transformedNormal.z < 0) {
                         var vertexA = Vertex.Copy(cMesh.Vertices[currentFace.A + vertexOffset]);
                         var vertexB = Vertex.Copy(cMesh.Vertices[currentFace.B + vertexOffset]);
                         var vertexC = Vertex.Copy(cMesh.Vertices[currentFace.C + vertexOffset]);
